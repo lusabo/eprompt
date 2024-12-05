@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from openai import OpenAI
 from order_validator import OrderValidator
+from query_generator import QueryGenerator
 
 
 app = Flask(__name__)
@@ -11,6 +12,7 @@ load_dotenv()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 validator = OrderValidator()
+query_generator = QueryGenerator(client)
 
 @app.route('/transcribe-audio', methods=['POST'])
 def transcribe_audio():
@@ -34,8 +36,10 @@ def transcribe_audio():
         
         if not validator.is_valid(transcription.text):
             return jsonify({"error": "O pedido não parece uma ordem."}), 400
+        
+        generated_query = query_generator.generate_query(transcription.text)
 
-        return jsonify({"transcribed_text": transcription.text})
+        return jsonify({"transcribed_text": transcription.text,"query": generated_query})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

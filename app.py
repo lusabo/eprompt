@@ -2,12 +2,15 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from openai import OpenAI
+from order_validator import OrderValidator
+
 
 app = Flask(__name__)
 
 load_dotenv()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+validator = OrderValidator()
 
 @app.route('/transcribe-audio', methods=['POST'])
 def transcribe_audio():
@@ -28,6 +31,9 @@ def transcribe_audio():
             
         if not transcription.text:
             return jsonify({"error": "Não foi possível transcrever o áudio."}), 500
+        
+        if not validator.is_valid(transcription.text):
+            return jsonify({"error": "O pedido não parece uma ordem."}), 400
 
         return jsonify({"transcribed_text": transcription.text})
 

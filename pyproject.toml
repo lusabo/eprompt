@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "flask>=3.1.0",
+    "guardrails-ai>=0.5.15",
     "jsonify>=0.5",
     "openai>=1.56.0",
     "pydub>=0.25.1",

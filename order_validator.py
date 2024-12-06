@@ -25,7 +25,7 @@ class OrderValidator:
 
         try:
             result = self.guard(
-                messages=[{"role": "user", "content": prompt}],
+                messages=[{"role": "system", "content": prompt}],
                 model="gpt-4o-mini"
             )
             

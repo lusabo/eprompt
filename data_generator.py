@@ -26,5 +26,5 @@ class DataGenerator:
 
             return response.choices[0].message.content
         except Exception as e:
-            print(f"Erro ao gerar a consulta: {e}")
+            print(f"Erro ao gerar o JSON: {e}")
             return None

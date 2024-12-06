@@ -11,9 +11,9 @@ app = Flask(__name__)
 load_dotenv()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-validator = OrderValidator()
-json_validator = JsonValidator()
-data_generator = DataGenerator(client)
+order_validator = OrderValidator()     # 1º Guardrail
+json_validator = JsonValidator()       # 2º Guardrail
+data_generator = DataGenerator(client) # Lógica de negócio
 
 @app.route('/transcribe-audio', methods=['POST'])
 def transcribe_audio():
@@ -30,19 +30,24 @@ def transcribe_audio():
 
     try:
         with open(temp_file, "rb") as audio_data:
+            # Manda o conteúdo do áudio para o ChatGPT fazzer a transcrição
             transcription = client.audio.transcriptions.create(model="whisper-1", file=audio_data)
             
         if not transcription.text:
             return jsonify({"error": "Não foi possível transcrever o áudio."}), 500
         
-        if not validator.is_valid(transcription.text):
+        # Passando pelo 1º GR
+        if not order_validator.is_valid(transcription.text):
             return jsonify({"error": "O pedido não parece uma ordem."}), 400
         
-        if not json_validator.isValid(transcription.text):
-            return jsonify({"error": "O JSON retornado pela LLM não é válido."}), 400
-        
+        # Minha lógica de negócio - Parte 1
         task_json = data_generator.generate(transcription.text)
 
+        # Passando pelo 2º GR
+        if not json_validator.is_valid(task_json):
+            return jsonify({"error": "O JSON retornado pela LLM não é válido."}), 400
+        
+        # Pegar o JSON e salvar no BD e mandar uma msg de ordem dada com sucesso.
         return jsonify({"transcribed_text": transcription.text, "json": task_json})
 
     except Exception as e:

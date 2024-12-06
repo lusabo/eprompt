@@ -5,7 +5,7 @@ class JsonValidator:
     def __init__(self) -> None:
         self.guard = guard.Guard().use(ValidJson, on_fail="exception")
     
-    def isValid(self, json: str) -> bool:
+    def is_valid(self, json: str) -> bool:
         try:
             self.guard.validate(json)
             return True

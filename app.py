@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from openai import OpenAI
 from order_validator import OrderValidator
 from data_generator import DataGenerator
@@ -20,13 +20,17 @@ order_validator = OrderValidator()     # 1º Guardrail
 json_validator = JsonValidator()       # 2º Guardrail
 data_generator = DataGenerator(client) # Lógica de negócio
 
+@app.route("/")
+def index():
+    return render_template("/index.html")
+
 @app.route('/transcribe-audio', methods=['POST'])
 def transcribe_audio():
     if 'audio' not in request.files:
         return jsonify({"error": "Nenhum arquivo de áudio foi enviado."}), 400
     
     audio_file = request.files['audio']
-    valid_extensions = ('.mp3', '.wav', '.m4a')
+    valid_extensions = ('.mp3', '.wav', '.m4a', '.webm')
     if not audio_file.filename.endswith(valid_extensions):
         return jsonify({"error": f"Formato de áudio inválido. Apenas {', '.join(valid_extensions)} são permitidos."}), 400
 

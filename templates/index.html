@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gravação de Áudio</title>
+</head>
+<body>
+    <h1>Gravação de Áudio</h1>
+    <button id="recordButton">Segure para Gravar</button>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+
+        // Configurar gravação de áudio
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+
+                mediaRecorder.ondataavailable = event => {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.start();
+            } catch (err) {
+                console.error('Erro ao acessar o microfone:', err);
+            }
+        }
+
+        function stopRecording() {
+            return new Promise(resolve => {
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    audioChunks = [];
+                    resolve(audioBlob);
+                };
+                mediaRecorder.stop();
+            });
+        }
+
+        async function sendAudioToAPI(audioBlob) {
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'audio.webm');
+
+            try {
+                const response = await fetch('http://localhost:5000/transcribe-audio', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    console.log('Áudio enviado com sucesso!');
+                } else {
+                    console.error('Erro ao enviar áudio:', response.statusText);
+                }
+            } catch (err) {
+                console.error('Erro ao enviar áudio:', err);
+            }
+        }
+
+        const recordButton = document.getElementById('recordButton');
+
+        recordButton.addEventListener('mousedown', async () => {
+            await startRecording();
+        });
+
+        recordButton.addEventListener('mouseup', async () => {
+            const audioBlob = await stopRecording();
+            await sendAudioToAPI(audioBlob);
+        });
+
+        recordButton.addEventListener('mouseleave', async () => {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                const audioBlob = await stopRecording();
+                await sendAudioToAPI(audioBlob);
+            }
+        });
+    </script>
+</body>
+</html>

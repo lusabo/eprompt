@@ -9,7 +9,9 @@ dependencies = [
     "guardrails-ai>=0.5.15",
     "jsonify>=0.5",
     "openai>=1.56.0",
+    "psycopg2-binary>=2.9.10",
     "pydub>=0.25.1",
     "python-dotenv>=1.0.1",
+    "sqlalchemy>=2.0.36",
     "whisper>=1.1.10",
 ]

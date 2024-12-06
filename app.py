@@ -5,6 +5,11 @@ from openai import OpenAI
 from order_validator import OrderValidator
 from data_generator import DataGenerator
 from json_validator import JsonValidator
+from task import Task
+from db import Base, engine
+
+# Cria as tabelas caso ainda não existam
+Base.metadata.create_all(engine)
 
 app = Flask(__name__)
 
@@ -47,6 +52,8 @@ def transcribe_audio():
         if not json_validator.is_valid(task_json):
             return jsonify({"error": "O JSON retornado pela LLM não é válido."}), 400
         
+        Task.save_task_from_json(task_json)
+
         # Pegar o JSON e salvar no BD e mandar uma msg de ordem dada com sucesso.
         return jsonify({"transcribed_text": transcription.text, "json": task_json})
 

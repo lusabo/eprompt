@@ -1,5 +1,17 @@
-# eprompt
-Trabalho da Disciplina eprompt
+### Universidade Federal de Goiás
+### Pós-Graduação em Sistemas e Agentes Inteligentes
+### Disciplina: Engenharia de Prompts
+
+### Professor
+
+* Sandeco
+
+### Alunos
+
+* Luciano Borges
+* Gustavo Menossi
+* Marcio Hernandez
+
 
 ## **PROMPT Assistente Criador de JSON \- V.1**
 
